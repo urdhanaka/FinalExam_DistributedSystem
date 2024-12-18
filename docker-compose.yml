@@ -1,92 +1,58 @@
+# Copyright VMware, Inc.
+# SPDX-License-Identifier: APACHE-2.0
+
+version: "2"
+
 services:
-  main-minio:
-    hostname: minio-server-1
-    image: quay.io/minio/minio
-    networks:
-      minio-eas:
-        ipv4_address: 10.10.0.5
-    command: server --console-address ":9001" http://minio-server-{1...3}:9000/data
+  minio:
+    image: docker.io/bitnami/minio:2024
     ports:
-      - "9000:9000"
-      - "9001:9001"
-    extra_hosts:
-      - "minio-server-1:10.10.0.2"
-      - "minio-server-2:10.10.0.3"
-      - "minio-server-3:10.10.0.4"
-    environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=admin1234
-
-  # main server
-  minio-server-1:
-    hostname: minio-server-1
-    image: quay.io/minio/minio
+      - 9000:9000
+      - 9001:9001
     volumes:
-      - /home/urdhanaka/Code/College/Distributed_System/Tugas_EAS/minio-data-1:/data
-    command: server http://minio-server-{1...3}:9000/data
+      - "./minio-data-1:/bitnami/minio/data"
     environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=admin1234
-    networks:
-      minio-eas:
-        ipv4_address: 10.10.0.2
-    expose:
-      - "9000"
-      - "9001"
-    extra_hosts:
-      - "minio-server-1:10.10.0.2"
-      - "minio-server-2:10.10.0.3"
-      - "minio-server-3:10.10.0.4"
-
-  minio-server-2:
-    hostname: minio-server-2
-    image: quay.io/minio/minio
+      - BITNAMI_DEBUG=true
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=miniosecret
+      - MINIO_DISTRIBUTED_MODE_ENABLED=yes
+      - MINIO_DISTRIBUTED_NODES=minio,minio2,minio3,minio4
+  minio2:
+    image: docker.io/bitnami/minio:2024
     volumes:
-      - /home/urdhanaka/Code/College/Distributed_System/Tugas_EAS/minio-data-2:/data
-    command: server http://minio-server-{1...3}:9000/data
+      - "./minio-data-2:/bitnami/minio/data"
     environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=admin1234
-    networks:
-      minio-eas:
-        ipv4_address: 10.10.0.3
-    expose:
-      - "9000"
-      - "9001"
-    extra_hosts:
-      - "minio-server-1:10.10.0.2"
-      - "minio-server-2:10.10.0.3"
-      - "minio-server-3:10.10.0.4"
-
-  minio-server-3:
-    hostname: minio-server-3
-    image: quay.io/minio/minio
+      - BITNAMI_DEBUG=true
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=miniosecret
+      - MINIO_DISTRIBUTED_MODE_ENABLED=yes
+      - MINIO_DISTRIBUTED_NODES=minio,minio2,minio3,minio4
+  minio3:
+    image: docker.io/bitnami/minio:2024
     volumes:
-      - /home/urdhanaka/Code/College/Distributed_System/Tugas_EAS/minio-data-3:/data
-    command: server http://minio-server-{1...3}:9000/data
+      - "./minio-data-3:/bitnami/minio/data"
     environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=admin1234
-    networks:
-      minio-eas:
-        ipv4_address: 10.10.0.4
-    expose:
-      - "9000"
-      - "9001"
-    extra_hosts:
-      - "minio-server-1:10.10.0.2"
-      - "minio-server-2:10.10.0.3"
-      - "minio-server-3:10.10.0.4"
-
-volumes:
-  minio-data-1:
-  minio-data-2:
-  minio-data-3:
-
-networks:
-  minio-eas:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.10.0.0/24
-          gateway: 10.10.0.1
+      - BITNAMI_DEBUG=true
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=miniosecret
+      - MINIO_DISTRIBUTED_MODE_ENABLED=yes
+      - MINIO_DISTRIBUTED_NODES=minio,minio2,minio3,minio4
+  minio4:
+    image: docker.io/bitnami/minio:2024
+    volumes:
+      - "./minio-data-4:/bitnami/minio/data"
+    environment:
+      - BITNAMI_DEBUG=true
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=miniosecret
+      - MINIO_DISTRIBUTED_MODE_ENABLED=yes
+      - MINIO_DISTRIBUTED_NODES=minio,minio2,minio3,minio4
+# volumes:
+#   minio_data:
+#     driver: local
+#   minio_2_data:
+#     driver: local
+#   minio_3_data:
+#     driver: local
+#   minio_4_data:
+#     driver: local

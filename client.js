@@ -86,7 +86,7 @@ async function main() {
   try {
     // Upload file
     console.log("Uploading file...");
-    await uploadFile("test.txt");
+    await uploadFile("test2.txt");
     console.log("File uploaded successfully");
 
     // Download file
