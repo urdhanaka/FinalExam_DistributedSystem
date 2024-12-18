@@ -1,0 +1,92 @@
+services:
+  main-minio:
+    hostname: minio-server-1
+    image: quay.io/minio/minio
+    networks:
+      minio-eas:
+        ipv4_address: 10.10.0.5
+    command: server --console-address ":9001" http://minio-server-{1...3}:9000/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    extra_hosts:
+      - "minio-server-1:10.10.0.2"
+      - "minio-server-2:10.10.0.3"
+      - "minio-server-3:10.10.0.4"
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin1234
+
+  # main server
+  minio-server-1:
+    hostname: minio-server-1
+    image: quay.io/minio/minio
+    volumes:
+      - /home/urdhanaka/Code/College/Distributed_System/Tugas_EAS/minio-data-1:/data
+    command: server http://minio-server-{1...3}:9000/data
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin1234
+    networks:
+      minio-eas:
+        ipv4_address: 10.10.0.2
+    expose:
+      - "9000"
+      - "9001"
+    extra_hosts:
+      - "minio-server-1:10.10.0.2"
+      - "minio-server-2:10.10.0.3"
+      - "minio-server-3:10.10.0.4"
+
+  minio-server-2:
+    hostname: minio-server-2
+    image: quay.io/minio/minio
+    volumes:
+      - /home/urdhanaka/Code/College/Distributed_System/Tugas_EAS/minio-data-2:/data
+    command: server http://minio-server-{1...3}:9000/data
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin1234
+    networks:
+      minio-eas:
+        ipv4_address: 10.10.0.3
+    expose:
+      - "9000"
+      - "9001"
+    extra_hosts:
+      - "minio-server-1:10.10.0.2"
+      - "minio-server-2:10.10.0.3"
+      - "minio-server-3:10.10.0.4"
+
+  minio-server-3:
+    hostname: minio-server-3
+    image: quay.io/minio/minio
+    volumes:
+      - /home/urdhanaka/Code/College/Distributed_System/Tugas_EAS/minio-data-3:/data
+    command: server http://minio-server-{1...3}:9000/data
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin1234
+    networks:
+      minio-eas:
+        ipv4_address: 10.10.0.4
+    expose:
+      - "9000"
+      - "9001"
+    extra_hosts:
+      - "minio-server-1:10.10.0.2"
+      - "minio-server-2:10.10.0.3"
+      - "minio-server-3:10.10.0.4"
+
+volumes:
+  minio-data-1:
+  minio-data-2:
+  minio-data-3:
+
+networks:
+  minio-eas:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.0.0/24
+          gateway: 10.10.0.1

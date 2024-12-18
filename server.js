@@ -1,8 +1,10 @@
+require('dotenv').config();
+
 const grpc = require("@grpc/grpc-js");
 const protoLoader = require("@grpc/proto-loader");
+const Minio = require('minio');
 const fs = require("fs");
 const path = require("path");
-
 const packageDefinition = protoLoader.loadSync("protos/storage.proto", {
   keepCase: true,
   longs: String,
@@ -13,8 +15,36 @@ const packageDefinition = protoLoader.loadSync("protos/storage.proto", {
 
 const storageProto = grpc.loadPackageDefinition(packageDefinition);
 
+const minioClients = [
+  new Minio.Client({
+    endPoint: process.env.MINIO_ENDPOINT_1.split(":")[0], // "localhost"
+    port: parseInt(process.env.MINIO_ENDPOINT_1.split(":")[1]),
+    useSSL: false,
+    accessKey: process.env.MINIO_ACCESS_KEY,
+    secretKey: process.env.MINIO_SECRET_KEY,
+  }),
+
+  // NOTE:  Use one minio client for now
+  //        will add other clients
+  //
+  // new Minio.Client({
+  //   endPoint: process.env.MINIO_ENDPOINT_1.split(":")[0], // "localhost"
+  //   port: process.env.MINIO_ENDPOINT_1.split(":")[2],
+  //   useSSL: false,
+  //   accessKey: process.env.MINIO_ACCESS_KEY,
+  //   secretKey: process.env.MINIO_SECRET_KEY,
+  // }),
+  // new Minio.Client({
+  //   endPoint: process.env.MINIO_ENDPOINT_1.split(":")[0], // "localhost"
+  //   port: process.env.MINIO_ENDPOINT_1.split(":")[3],
+  //   useSSL: false,
+  //   accessKey: process.env.MINIO_ACCESS_KEY,
+  //   secretKey: process.env.MINIO_SECRET_KEY,
+  // })
+]
+
 // Implement the service methods
-const uploadFile = (call, callback) => {
+function uploadFile(call, callback) {
   let fileData = Buffer.alloc(0);
   let fileName = "";
 
@@ -26,7 +56,15 @@ const uploadFile = (call, callback) => {
   call.on("end", () => {
     // Save the file
     fs.writeFileSync(path.join(__dirname, "uploads", fileName), fileData);
-    callback(null, { message: `File ${fileName} uploaded successfully` });
+
+    // save to minio
+    const client = minioClients[0];
+    client.putObject('files', fileName, fileData).then((res) => {
+      console.log(`${new Date()}: ${fileName} uploaded successfully!`);
+      callback(null, { message: `File ${fileName} uploaded successfully` });
+    }).catch((err) => {
+      console.error(`error: ${fileName} gagal untuk diupload: `, err)
+    });
   });
 
   call.on("error", (error) => {
