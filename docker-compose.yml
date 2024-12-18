@@ -5,7 +5,9 @@ version: "2"
 
 services:
   minio:
-    image: docker.io/bitnami/minio:2024
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 9000:9000
       - 9001:9001
@@ -17,8 +19,11 @@ services:
       - MINIO_ROOT_PASSWORD=miniosecret
       - MINIO_DISTRIBUTED_MODE_ENABLED=yes
       - MINIO_DISTRIBUTED_NODES=minio,minio2,minio3,minio4
+      - MINIO_STORAGE_CLASS_STANDARD=EC:0
   minio2:
-    image: docker.io/bitnami/minio:2024
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - "./minio-data-2:/bitnami/minio/data"
     environment:
@@ -27,8 +32,11 @@ services:
       - MINIO_ROOT_PASSWORD=miniosecret
       - MINIO_DISTRIBUTED_MODE_ENABLED=yes
       - MINIO_DISTRIBUTED_NODES=minio,minio2,minio3,minio4
+      - MINIO_STORAGE_CLASS_STANDARD=EC:0
   minio3:
-    image: docker.io/bitnami/minio:2024
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - "./minio-data-3:/bitnami/minio/data"
     environment:
@@ -37,8 +45,11 @@ services:
       - MINIO_ROOT_PASSWORD=miniosecret
       - MINIO_DISTRIBUTED_MODE_ENABLED=yes
       - MINIO_DISTRIBUTED_NODES=minio,minio2,minio3,minio4
+      - MINIO_STORAGE_CLASS_STANDARD=EC:0
   minio4:
-    image: docker.io/bitnami/minio:2024
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - "./minio-data-4:/bitnami/minio/data"
     environment:
@@ -47,12 +58,4 @@ services:
       - MINIO_ROOT_PASSWORD=miniosecret
       - MINIO_DISTRIBUTED_MODE_ENABLED=yes
       - MINIO_DISTRIBUTED_NODES=minio,minio2,minio3,minio4
-# volumes:
-#   minio_data:
-#     driver: local
-#   minio_2_data:
-#     driver: local
-#   minio_3_data:
-#     driver: local
-#   minio_4_data:
-#     driver: local
+      - MINIO_STORAGE_CLASS_STANDARD=EC:0
