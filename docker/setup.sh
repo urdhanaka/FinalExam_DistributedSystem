@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Wait for MinIO servers to be ready
-sleep 20
+sleep 3
 
 # Setup aliases
 mc alias set minio1 http://minio1:9000 minioadmin minioadmin
@@ -17,57 +17,45 @@ for endpoint in minio1 minio2 minio3; do
 done
 
 # Set bucket policy to allow replication
-mc admin policy attach download minio1/files
-mc admin policy attach download minio2/files
-mc admin policy attach download minio3/files
+# mc admin policy attach download minio1/files
+# mc admin policy attach download minio2/files
+# mc admin policy attach download minio3/files
 
 # Configure replication from minio1 to minio2
 mc replicate add minio1/files \
-    --remote-bucket files \
-    --remote-endpoint "http://minio2:9000" \
-    --remote-access-key minioadmin \
-    --remote-secret-key minioadmin \
-    --sync
+    --remote-bucket minio2/files \
+    --sync \
+    --priority 1
 
 # Configure replication from minio1 to minio3
 mc replicate add minio1/files \
-    --remote-bucket files \
-    --remote-endpoint "http://minio3:9000" \
-    --remote-access-key minioadmin \
-    --remote-secret-key minioadmin \
-    --sync
+    --remote-bucket minio3/files \
+    --sync \
+    --priority 2
 
 # Configure replication from minio2 to minio1
 mc replicate add minio2/files \
-    --remote-bucket files \
-    --remote-endpoint "http://minio1:9000" \
-    --remote-access-key minioadmin \
-    --remote-secret-key minioadmin \
-    --sync
+    --remote-bucket minio1/files \
+    --sync \
+    --priority 3
 
 # Configure replication from minio2 to minio3
 mc replicate add minio2/files \
-    --remote-bucket files \
-    --remote-endpoint "http://minio3:9000" \
-    --remote-access-key minioadmin \
-    --remote-secret-key minioadmin \
-    --sync
+    --remote-bucket minio3/files \
+    --sync \
+    --priority 4
 
 # Configure replication from minio3 to minio1
 mc replicate add minio3/files \
-    --remote-bucket files \
-    --remote-endpoint "http://minio1:9000" \
-    --remote-access-key minioadmin \
-    --remote-secret-key minioadmin \
-    --sync
+    --remote-bucket minio1/files \
+    --sync \
+    --priority 5
 
 # Configure replication from minio3 to minio2
 mc replicate add minio3/files \
-    --remote-bucket files \
-    --remote-endpoint "http://minio2:9000" \
-    --remote-access-key minioadmin \
-    --remote-secret-key minioadmin \
-    --sync
+    --remote-bucket minio2/files \
+    --sync \
+    --priority 6
 
 # Verify replication setup
 echo "Verifying replication configuration..."
