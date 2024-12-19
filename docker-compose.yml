@@ -1,0 +1,104 @@
+services:
+  minio1:
+    image: minio/minio:latest
+    hostname: minio1
+    volumes:
+      - data1:/data
+    ports:
+      - "9001:9000"
+      - "9011:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - minio_network
+
+  minio2:
+    image: minio/minio:latest
+    hostname: minio2
+    volumes:
+      - data2:/data
+    ports:
+      - "9002:9000"
+      - "9012:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - minio_network
+
+  minio3:
+    image: minio/minio:latest
+    hostname: minio3
+    volumes:
+      - data3:/data
+    ports:
+      - "9003:9000"
+      - "9013:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - minio_network
+
+  setup:
+    image: minio/mc
+    depends_on:
+      minio1:
+        condition: service_healthy
+      minio2:
+        condition: service_healthy
+      minio3:
+        condition: service_healthy
+    volumes:
+      - ./docker/setup.sh:/setup.sh
+    entrypoint: ["/bin/sh"]
+    command: ["/setup.sh"]
+    networks:
+      - minio_network
+    # Tambahkan ini agar container tetap running
+    tty: true
+    stdin_open: true
+
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - MINIO_ENDPOINT=minio1
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+    depends_on:
+      - minio1
+      - minio2
+      - minio3
+    networks:
+      - minio_network
+
+networks:
+  minio_network:
+    driver: bridge
+
+volumes:
+  data1:
+  data2:
+  data3:
