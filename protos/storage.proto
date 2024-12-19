@@ -5,6 +5,7 @@ package FileStorage;
 service FileStorage {
   rpc UploadFile(stream FileRequest) returns (UploadResponse);
   rpc DownloadFile(FileDownloadRequest) returns (stream FileResponse);
+  rpc DeleteFile(FileDeleteRequest) returns (FileDeleteResponse);
   rpc GetMetadata(FileMetadataRequest) returns (MetadataResponse);
 }
 
@@ -23,6 +24,14 @@ message FileDownloadRequest {
 
 message FileResponse {
   bytes fileData = 1;
+}
+
+message FileDeleteRequest {
+  string fileName = 1;
+}
+
+message FileDeleteResponse {
+  string message = 1;
 }
 
 message FileMetadataRequest {

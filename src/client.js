@@ -101,6 +101,20 @@ async function getMetadata(fileName) {
   });
 }
 
+async function deleteFile(fileName) {
+  return new Promise((resolve, reject) => {
+    client.DeleteFile({ fileName }, (error, response) => {
+      if (error) {
+        console.error("Delete file error: ", error);
+        reject(error);
+        return;
+      }
+
+      resolve(response);
+    })
+  });
+}
+
 // Command line interface
 async function main() {
   const command = process.argv[2];
@@ -111,6 +125,7 @@ async function main() {
     console.log("  Upload:   node client.js upload <filePath>");
     console.log("  Download: node client.js download <fileName>");
     console.log("  Metadata: node client.js metadata <fileName>");
+    console.log("  Delete:   node client.js delete <fileName>");
     process.exit(1);
   }
 
@@ -138,8 +153,14 @@ async function main() {
         console.log("Metadata:", metadata);
         break;
 
+      case "delete":
+        console.log(`Deleting file ${filePath}`);
+        const res = await deleteFile(filePath);
+        console.log(res);
+        break;
+
       default:
-        console.log("Invalid command. Use 'upload', 'download', or 'metadata'");
+        console.log("Invalid command. Use 'upload', 'download', 'metadata', or 'delete'");
         process.exit(1);
     }
   } catch (error) {
@@ -201,5 +222,6 @@ module.exports = {
   uploadFile,
   downloadFile,
   getMetadata,
+  deleteFile,
   runTests,
 };

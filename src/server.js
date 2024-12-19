@@ -78,11 +78,25 @@ const getMetadata = async (call, callback) => {
   }
 };
 
+const deleteFile = async (call, callback) => {
+  const fileName = call.request.fileName;
+
+  try {
+    await minioClient.removeObject(BUCKET_NAME, fileName);
+    callback(null, {
+      message: `${fileName} deleted successfully`
+    });
+  } catch (error) {
+    callback(error);
+  }
+}
+
 function startServer() {
   const server = new grpc.Server();
   server.addService(storageProto.FileStorage.FileStorage.service, {
     UploadFile: uploadFile,
     DownloadFile: downloadFile,
+    DeleteFile: deleteFile,
     GetMetadata: getMetadata,
   });
 
@@ -94,7 +108,6 @@ function startServer() {
         console.error(error);
         return;
       }
-      server.start();
       console.log(`Server running at http://0.0.0.0:${port}`);
     }
   );
